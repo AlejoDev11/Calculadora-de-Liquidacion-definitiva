@@ -132,7 +132,7 @@ def BuscarUsuarios( cedula: str ):
         raise ErrorNoEncontrado(f"No se encontro al usuario con la cedula = {cedula}")
     
     else:
-        return Usuario(lista[0],lista[1],lista[2],lista[5], lista[3],lista[4])
+        return Usuario(lista[1],lista[0],lista[2],lista[3], lista[4],lista[5])
     
 def BuscarUsuariosExistentes( cedula: str ):
     """

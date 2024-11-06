@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calcular Liquidación Definitiva</title>
+</head>
+<body>
+    <h2>Calcular Liquidación Definitiva</h2>
+    <form method="POST">
+        <label for="cedula">Cédula:</label>
+        <input type="text" id="cedula" name="cedula" required>
+        <button type="submit">Calcular</button>
+    </form>
+    
+    {% if resultado %}
+        <h3>Resultado de la Liquidación</h3>
+        <ul>
+            <li>Indemnización: {{ resultado.indemnizacion }}</li>
+            <li>Vacaciones: {{ resultado.vacaciones }}</li>
+            <li>Cesantía: {{ resultado.cesantia }}</li>
+            <li>Bonos: {{ resultado.bonos }}</li>
+            <li>Intereses sobre Cesantía: {{ resultado.intereses_cesantia }}</li>
+            <li>Retención de Impuesto: {{ resultado.retencion_impuesto }}</li>
+            <li><strong>Total a Pagar: {{ resultado.total_a_pagar }}</strong></li>
+        </ul>
+    {% endif %}
+</body>
+</html>
