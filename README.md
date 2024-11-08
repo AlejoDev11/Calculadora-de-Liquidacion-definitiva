@@ -48,7 +48,7 @@ PGPORT = 5432 # POR DEFECTO ES 5432, PERO PUEDE CAMBIAR EN SU DB
 
 ### Cómo correr las pruebas unitarias del controlador:
 ```markdown
-python test/testcontroller.py
+python test/Controllertest.py
 ```
 ### Cómo correr las pruebas unitarias de la logica:
 ```markdown

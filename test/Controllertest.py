@@ -30,7 +30,7 @@ class Testcontroller(unittest.TestCase):
 
         print("Ejecutando testInsertCorrecto")
         
-        usuario_prueba = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        usuario_prueba = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150, "Renuncia")
         Insertar(usuario_prueba)
 
         Usuario_buscado = BuscarUsuarios(usuario_prueba.cedula)
@@ -41,6 +41,7 @@ class Testcontroller(unittest.TestCase):
         self.assertEqual(str(usuario_prueba.fecha_inicio), Usuario_buscado.fecha_inicio)
         self.assertEqual(str(usuario_prueba.fecha_ultimo_vacaciones), Usuario_buscado.fecha_ultimo_vacaciones)
         self.assertEqual(str(usuario_prueba.dias_vacaciones_acumulados), Usuario_buscado.dias_vacaciones_acumulados)
+        self.assertAlmostEqual(str(usuario_prueba.motivo_finalizacion), Usuario_buscado.motivo_finalizacion)
         
     def testsInsertError(self):
         """ Verifica que funcione bien la excepcion ErrorNoInsertado
@@ -49,10 +50,10 @@ class Testcontroller(unittest.TestCase):
 
         print("Ejecutando testInsertError")
         
-        usuario_prueba = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        usuario_prueba = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150, "Renuncia")
         Insertar(usuario_prueba)
 
-        usuario_prueba2 = Usuario("12345","Jose", 4000000, "10/05/2023", "10/05/2024", 160)
+        usuario_prueba2 = Usuario("12345","Jose", 4000000, "10/05/2023", "10/05/2024", 160, "Despido")
         
         with self.assertRaises(ErrorNoInsertado):
             Insertar(usuario_prueba2)
@@ -63,12 +64,12 @@ class Testcontroller(unittest.TestCase):
         """
         print("Ejecutando testActualizarCorrecto")
 
-        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150, "Renuncia")
         Insertar(usuario)
         #entradas
-        usuario_actualizado = Usuario(cedula= "12345", nombre = "Jose", salario_basico = 5000000, fecha_inicio = "10/04/2023", fecha_ultimo_vacaciones = "10/04/2024", dias_vacaciones_acumulados = 159)
+        usuario_actualizado = Usuario(cedula= "12345", nombre = "Jose", salario_basico = 5000000, fecha_inicio = "10/04/2023", fecha_ultimo_vacaciones = "10/04/2024", dias_vacaciones_acumulados = 159, motivo_finalizacion= "Despido")
 
-        Actualizar(usuario.cedula,usuario_actualizado.nombre, usuario_actualizado.salario_basico, usuario_actualizado.fecha_inicio, usuario_actualizado.fecha_ultimo_vacaciones, usuario_actualizado.dias_vacaciones_acumulados)
+        Actualizar(usuario.cedula,usuario_actualizado.nombre, usuario_actualizado.salario_basico, usuario_actualizado.fecha_inicio, usuario_actualizado.fecha_ultimo_vacaciones, usuario_actualizado.dias_vacaciones_acumulados, usuario_actualizado.motivo_finalizacion)
         Usuario_buscado = BuscarUsuarios(usuario.cedula)
 
         self.assertEqual(str(usuario_actualizado.cedula), Usuario_buscado.cedula)
@@ -85,13 +86,13 @@ class Testcontroller(unittest.TestCase):
         """
         print("Ejecutando testActualizarError")
 
-        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150, "Renuncia")
         Insertar(usuario)
 
-        usuario_actualizado = Usuario(cedula= "1235", nombre = "Jose", salario_basico = 5000000, fecha_inicio = "10/04/2023", fecha_ultimo_vacaciones = "10/04/2024", dias_vacaciones_acumulados = 159)
+        usuario_actualizado = Usuario(cedula= "1235", nombre = "Jose", salario_basico = 5000000, fecha_inicio = "10/04/2023", fecha_ultimo_vacaciones = "10/04/2024", dias_vacaciones_acumulados = 159, motivo_finalizacion="Renuncia")
 
         with self.assertRaises(ErrorNoActualizado):
-            Actualizar(usuario_actualizado.cedula, usuario_actualizado.nombre, usuario_actualizado.salario_basico, usuario_actualizado.fecha_inicio, usuario_actualizado.fecha_ultimo_vacaciones, usuario_actualizado.dias_vacaciones_acumulados)
+            Actualizar(usuario_actualizado.cedula, usuario_actualizado.nombre, usuario_actualizado.salario_basico, usuario_actualizado.fecha_inicio, usuario_actualizado.fecha_ultimo_vacaciones, usuario_actualizado.dias_vacaciones_acumulados, usuario_actualizado.motivo_finalizacion)
 
     def testBorrarCorrecto(self):
         """
@@ -99,7 +100,7 @@ class Testcontroller(unittest.TestCase):
         """
         print("Ejecutando testBorrarCorrecto")
         
-        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150, "Renuncia")
         Insertar(usuario)
 
         Borrar(usuario.cedula)
@@ -114,7 +115,7 @@ class Testcontroller(unittest.TestCase):
         """
         print("Ejecutando testBorrarError")
 
-        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150, "Renuncia")
         Insertar(usuario)
         cedula = "hola_mundo"
 
@@ -127,7 +128,7 @@ class Testcontroller(unittest.TestCase):
         """
         print("Ejecutando testBuscarCorrecto")
 
-        usuario_prueba = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        usuario_prueba = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150, "Renuncia")
         Insertar(usuario_prueba)
 
         Usuario_buscado = BuscarUsuarios(usuario_prueba.cedula)
@@ -146,7 +147,7 @@ class Testcontroller(unittest.TestCase):
         """
         print("Ejecutando testBuscarError")
 
-        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        usuario = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150, "Renuncia")
         Insertar(usuario)
         cedula = "Hola_Mundo"
         with self.assertRaises(ErrorNoEncontrado):

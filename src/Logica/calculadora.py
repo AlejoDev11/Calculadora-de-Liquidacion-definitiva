@@ -2,14 +2,14 @@ from datetime import datetime
 import math
 
 class Usuario:
-    def __init__(self, cedula: str, nombre: str, salario_basico: float, fecha_inicio: str, fecha_ultimo_vacaciones: str, dias_vacaciones_acumulados: int):
+    def __init__(self, cedula: str, nombre: str, salario_basico: float, fecha_inicio: str, fecha_ultimo_vacaciones: str, dias_vacaciones_acumulados: int, motivo_finalizacion: str):
         self.cedula = cedula
         self.nombre = nombre 
         self.salario_basico = salario_basico
         self.fecha_inicio = fecha_inicio
         self.fecha_ultimo_vacaciones = fecha_ultimo_vacaciones
         self.dias_vacaciones_acumulados = dias_vacaciones_acumulados
-        self.motivo_finalizacion = None
+        self.motivo_finalizacion = motivo_finalizacion
 
 class ErrorDiasAcumulados(Exception):
     pass
@@ -135,15 +135,17 @@ class CalculadorLiquidacion:
         :param anos_trabajados: Años trabajados.
         :return: Indemnización calculada.
         """
-        if self.usuario.motiivo_finalizacion.upper() == "RENUNCIA":
+        if self.usuario.motivo_finalizacion.upper() == "RENUNCIA":
             indemnizacion = 0
             return indemnizacion
      
         if anos_trabajados < 1:
             indemnizacion = self.usuario.salario_basico
 
-        parte_entera_minima = math.floor(anos_trabajados)
-        parte_entera_maxima = math.ceil(anos_trabajados)
+        if anos_trabajados < 1.5 :
+            parte_entera_minima = math.floor(anos_trabajados)
+        elif anos_trabajados >= 1.5:
+            parte_entera_maxima = math.ceil(anos_trabajados)
 
         if parte_entera_maxima > parte_entera_minima and parte_entera_minima > 1:
             diferencia = parte_entera_maxima - parte_entera_maxima

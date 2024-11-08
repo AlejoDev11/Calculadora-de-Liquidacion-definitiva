@@ -9,8 +9,8 @@ para poder ejecutar la aplicación
 
 # Do not expose your Neon credentials to the browser
 
-PGHOST='ep-odd-mouse-a5377c01.us-east-2.aws.neon.tech'
+PGHOST='ep-calm-resonance-a59wzo3t.us-east-2.aws.neon.tech'
 PGDATABASE='neondb'
 PGUSER='neondb_owner'
-PGPASSWORD='zmLdv5spu0bX'
+PGPASSWORD='TkdMR4mwtaZ1'
 PGPORT = 5432 # POR DEFECTO ES 5432, PERO PUEDE CAMBIAR EN SU DB

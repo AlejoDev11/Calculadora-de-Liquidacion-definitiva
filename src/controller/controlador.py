@@ -23,6 +23,9 @@ class ErrorConexionBD(Exception):
 class ErrorNoSeCreoLaBD(Exception):
     pass
 
+class ErrorNoSeBorroLaBD(Exception):
+    pass
+
 def ObtenerConexion():
     """
     Crea la conexión a la base de datos.
@@ -66,8 +69,8 @@ def BorrarFilas():
 def Insertar(usuario: Usuario):
     """Guarda un Usuario en la base de datos."""
     sql = f"""
-        INSERT INTO usuarios (cedula, nombre, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days)
-        VALUES ('{usuario.cedula}','{usuario.nombre}','{usuario.salario_basico}','{usuario.fecha_inicio}','{usuario.fecha_ultimo_vacaciones}','{usuario.dias_vacaciones_acumulados}');
+        INSERT INTO usuarios (cedula, nombre, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days, reason_for_termination)
+        VALUES ('{usuario.cedula}','{usuario.nombre}','{usuario.salario_basico}','{usuario.fecha_inicio}','{usuario.fecha_ultimo_vacaciones}','{usuario.dias_vacaciones_acumulados}', '{usuario.motivo_finalizacion}');
     """
     if BuscarUsuariosExistentes(usuario.cedula) == True:
         raise ErrorNoInsertado(f"El usuario con cédula {usuario.cedula} ya existe.")
@@ -82,7 +85,7 @@ def Insertar(usuario: Usuario):
 
 
 # Modificar Datos
-def Actualizar(cedula: str, nombre, salario_basico, fecha_inicio, fecha_ultimo_vacaciones, dias_vacaciones_acumulados):
+def Actualizar(cedula: str, nombre, salario_basico, fecha_inicio, fecha_ultimo_vacaciones, dias_vacaciones_acumulados, motivo_finalizacion):
     """
     Actualiza los datos de un usuario en la base de datos.
     """
@@ -98,7 +101,8 @@ def Actualizar(cedula: str, nombre, salario_basico, fecha_inicio, fecha_ultimo_v
                 basic_salary = '{salario_basico}',
                 start_work_date = '{fecha_inicio}',
                 last_vacation_date = '{fecha_ultimo_vacaciones}',
-                accumulated_vacation_days = '{dias_vacaciones_acumulados}'
+                accumulated_vacation_days = '{dias_vacaciones_acumulados}',
+                reason_for_termination = '{motivo_finalizacion}'
             WHERE cedula = '{cedula}';
         """)
         conexion.connection.commit()
@@ -126,7 +130,7 @@ def Borrar(cedula: str):
 def BuscarUsuarios(cedula: str) -> Usuario:
     """Busca y devuelve un usuario según la cédula."""
     sql = f"""
-        SELECT nombre, cedula, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days FROM usuarios WHERE cedula = '{cedula}' 
+        SELECT nombre, cedula, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days, reason_for_termination FROM usuarios WHERE cedula = '{cedula}' 
     """
     cursor = ObtenerConexion()
     cursor.execute(sql)
@@ -134,7 +138,7 @@ def BuscarUsuarios(cedula: str) -> Usuario:
     if resultado is None:
         raise ErrorNoEncontrado(f"No se encontró el usuario con cédula: {cedula}")
         
-    return Usuario(resultado[1], resultado[0], resultado[2], resultado[3], resultado[4], resultado[5])
+    return Usuario(resultado[1], resultado[0], resultado[2], resultado[3], resultado[4], resultado[5], resultado[6])
 
 # Verificar si un Usuario existe
 def BuscarUsuariosExistentes(cedula: str) -> bool:
