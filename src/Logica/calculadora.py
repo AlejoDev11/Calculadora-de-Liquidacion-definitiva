@@ -142,17 +142,21 @@ class CalculadorLiquidacion:
         if anos_trabajados < 1:
             indemnizacion = self.usuario.salario_basico
 
-        if anos_trabajados < 1.5 :
+        parte_entera_maxima = 0
+        parte_entera_minima = 0
+        diferencia = 0
+
+        if anos_trabajados < 1.5 and anos_trabajados > 0:
             parte_entera_minima = math.floor(anos_trabajados)
         elif anos_trabajados >= 1.5:
             parte_entera_maxima = math.ceil(anos_trabajados)
 
-        if parte_entera_maxima > parte_entera_minima and parte_entera_minima > 1:
+        if parte_entera_maxima > parte_entera_minima and parte_entera_minima >= 1:
             diferencia = parte_entera_maxima - parte_entera_maxima
-            fraccion_del_año = 0
-            if diferencia == 1:
-                fraccion_del_año = CalculadorLiquidacion.DIAS_POR_AÑO_ADICIONAL
-            indemnizacion = self.usuario.salario_basico + ((((CalculadorLiquidacion.DIAS_POR_AÑO_ADICIONAL * parte_entera_minima)+ fraccion_del_año)*self.usuario.salario_basico/CalculadorLiquidacion.DIAS_DEL_MES))
+        fraccion_del_año = 0
+        if diferencia == 1:
+            fraccion_del_año = CalculadorLiquidacion.DIAS_POR_AÑO_ADICIONAL
+        indemnizacion = self.usuario.salario_basico + ((((CalculadorLiquidacion.DIAS_POR_AÑO_ADICIONAL * parte_entera_minima)+ fraccion_del_año)*self.usuario.salario_basico/CalculadorLiquidacion.DIAS_DEL_MES))
         return indemnizacion
 
     def calcular_vacaciones(self, dias_trabajados):
