@@ -2,8 +2,8 @@ import sys
 sys.path.append("src")
 
 from flask import Flask, render_template, request, redirect, url_for, flash
-from controller.controlador import Insertar, Actualizar, Borrar, BuscarUsuarios
-from Logica.calculadora import Usuario 
+from controller.controlador import Insertar, Actualizar, Borrar, BuscarUsuarios, ErrorNoInsertado
+from Logica.calculadora import Usuario
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Cambia esto por una clave segura
@@ -16,24 +16,21 @@ def index():
 @app.route('/insertar', methods=['GET', 'POST'])
 def insertar_usuario():
     """Ruta para insertar un nuevo usuario."""
-    if request.method == 'POST':
-        cedula = request.form['cedula']
-        nombre = request.form['nombre']
-        basic_salary = request.form['basic_salary']
-        start_date = request.form['start_date']
-        last_vacation_date = request.form['last_vacation_date']
-        accumulated_vacation_days = request.form['accumulated_vacation_days']
+    cedula = request.args["cedula"]
+    nombre = request.args["nombre"]
+    basic_salary = request.args["basic_salary"]
+    start_date = request.args["start_date"]
+    last_vacation_date = request.args["last_vacation_date"]
+    accumulated_vacation_days = request.args["accumulated_vacation_days"]
         
-        usuario = Usuario(cedula, nombre, basic_salary, start_date, last_vacation_date, accumulated_vacation_days)
+    usuario = Usuario(cedula, nombre, basic_salary, start_date, last_vacation_date, accumulated_vacation_days)
         
-        try:
-            Insertar(usuario)
-            flash('Usuario insertado exitosamente.', 'success')
-            return redirect(url_for('index'))
-        except Exception as e:
-            flash(f'Error al insertar usuario: {str(e)}', 'danger')
+    try:
+        Insertar(usuario)
+    except:
+        raise ErrorNoInsertado(f"El usuario no pudo ser insertado")
     
-    return render_template('insertar.html')
+    return f"El usuario fue insertado exitosamente"
 
 @app.route('/actualizar', methods=['GET', 'POST'])
 def actualizar_usuario():
