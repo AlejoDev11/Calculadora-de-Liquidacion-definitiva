@@ -6,7 +6,7 @@
 </head>
 <body>
     <h2>Buscar Usuario</h2>
-    <form method="post">
+    <form action="/buscado">
         <label for="cedula">Cédula:</label>
         <input type="text" name="cedula" required><br>
         <button type="submit">Buscar</button>
@@ -16,10 +16,10 @@
     <h3>Detalles del Usuario</h3>
     <p>Cédula: {{ usuario.cedula }}</p>
     <p>Nombre: {{ usuario.nombre }}</p>
-    <p>Salario Básico: {{ usuario.basic_salary }}</p>
-    <p>Fecha de Inicio: {{ usuario.start_date }}</p>
-    <p>Última Fecha de Vacaciones: {{ usuario.last_vacation_date }}</p>
-    <p>Días de Vacaciones Acumulados: {{ usuario.accumulated_vacation_days }}</p>
+    <p>Salario Básico: {{ usuario.salario_basico }}</p>
+    <p>Fecha de Inicio: {{ usuario.fecha_inicio }}</p>
+    <p>Última Fecha de Vacaciones: {{ usuario.fecha_ultimo_vacaciones }}</p>
+    <p>Días de Vacaciones Acumulados: {{ usuario.dias_vacaciones_acumulados }}</p>
 {% else %}
     <p>No se encontraron resultados para la cédula ingresada.</p>
 {% endif %}

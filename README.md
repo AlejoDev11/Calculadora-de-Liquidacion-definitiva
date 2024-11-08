@@ -24,24 +24,35 @@ Asegúrate de tener instalado:
 
 Clona este repositorio en tu máquina local usando Git:
 ```markdown
-https://github.com/JuanPyC/Calculadora-de-Liquidacion-definitiva
-
+https://github.com/AlejoDev11/Calculadora-de-Liquidacion-definitiva/tree/main
 ```
 ### Cómo configurar el archivo SecretConfig.py:
 Datos secretos que no deben publicarse en el repositorio
 
-Cree un archivo llamado SecretConfig en la carpeta raíz del proyecto "src", el cual contendrá los información de su base de datos. 
+Cree un archivo llamado SecretConfig en la carpeta "src" del proyecto, el cual contendrá la información de coneccion con su base de datos.
+de esta manera:
+
+Datos secretos que no deben publicarse en el repo
+
+Diligencie estos datos y guarde este archivo como SecretConfig.py en el modulo src
+para poder ejecutar la aplicación
 
 #### El Archivo debe de contener lo siguiente:
+
 PGDATABASE = "ESCRIBA EL NOMBRE DE LA BASE DE DATOS"
 PGUSER = "ESCRIBA EL USUARIO DE LA DB"
 PGPASSWORD = "ESCRIBA LA CONSTRASEÑA"
 PGHOST = "ESCRIBA LA DIRECCION DNS O DIRECCION IP DEL SERVIDOR"
 PGPORT = 5432 # POR DEFECTO ES 5432, PERO PUEDE CAMBIAR EN SU DB
 
-### Cómo correr las pruebas unitarias:
+
+### Cómo correr las pruebas unitarias del controlador:
 ```markdown
 python test/testcontroller.py
+```
+### Cómo correr las pruebas unitarias de la logica:
+```markdown
+python test/testlogica.py
 ```
 
 ### Cómo operar la consola de la BD:
@@ -50,3 +61,6 @@ python src/Consola/Consola_Base_de_datos.py
 ```
 
 ### Cómo ejecutar la aplicación web:
+```markdown
+python app.py
+```

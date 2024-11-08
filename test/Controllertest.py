@@ -1,70 +1,61 @@
 import sys 
 sys.path.append("src")
-from controller.controlador import Insertar, BuscarUsuarios, Borrar, Actualizar
+from controller.controlador import * 
 from Logica.calculadora import Usuario
-
-#caso de exito
-usuario_valido = Usuario(
-    cedula="12345678",
-    nombre="Juan",
-    basic_salary=1000,
-    start_date="2023-01-01",
-    last_vacation_date="2023-10-01",
-    accumulated_vacation_days=5
-)
-Insertar(usuario_valido)
-
-usuario_actualizado = Usuario(
-    cedula="12345678",
-    nombre="Juan Carlos",
-    basic_salary=1200,
-    start_date="2023-01-01",
-    last_vacation_date="2023-10-01",
-    accumulated_vacation_days=10
-)
-Actualizar(usuario_actualizado)
+import unittest
 
 
+class Testcontroller(unittest.TestCase):
+    """ Pruebas a la Clase Controlador de la aplicación """
 
-#caso de fallo
-usuario_invalido = Usuario(
-    cedula="",
-    nombre="Juan",
-    basic_salary=1000,
-    start_date="2023-01-01",
-    last_vacation_date="2023-10-01",
-    accumulated_vacation_days=5
-)
-try:
-    Insertar(usuario_invalido)
-except Exception as e:
-    print(e)
+    def setUp(self):
+        """ Se ejecuta siempre antes de cada metodo de prueba """
+        print("Invocando setUp")
+        BorrarFilas() # Asegura que antes de cada metodo de prueba, se borren todos los datos de la tabla
 
-usuario_actualizado = Usuario(
-    cedula="12345678",
-    nombre="Juan Carlos",
-    basic_salary=1200,
-    start_date="2023-01-01",
-    last_vacation_date="2023-10-01",
-    accumulated_vacation_days=10
-)
-Actualizar(usuario_actualizado)
+    def setUpClass():
+        """ Se ejecuta al inicio de todas las pruebas """
+        print("Invocando setUpClass")
+        CrearTabla()  # Asegura que al inicio de las pruebas, la tabla este creada
+    
+    def tearDown(self):
+        """ Se ejecuta al final de cada test """
+        print("Invocando tearDown")
 
-#borrar
-cedula_existente = "12345678"
-Borrar(cedula_existente)
+    def tearDownClass():
+        """ Se ejecuta al final de todos los tests """
+        print("Invocando tearDownClass")
 
-cedula_inexistente = "00000000"
-try:
-    Borrar(cedula_inexistente)
-except Exception as e:
-    print(e)
+    def TestInsertCorrecto(self):
+        """ Verifica que funcione bien la creacion y la busqueda de un usuario """
 
-#buscar
-cedula_existente = "12345678"
-resultado = BuscarUsuarios(cedula_existente)
-print(resultado)
+        print("Ejecutando testInsert1")
+        
+        usuario_prueba = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        Insertar(usuario_prueba)
 
-cedula_inexistente = "00000000"
-resultado = BuscarUsuarios(cedula_inexistente)
-print(resultado)
+        Usuario_buscado = BuscarUsuarios(usuario_prueba.cedula)
+
+        self.assertEqual(usuario_prueba.cedula, str(Usuario_buscado.cedula))
+        self.assertEqual(usuario_prueba.nombre, str(Usuario_buscado.nombre))
+        self.assertEqual(usuario_prueba.salario_basico, str(Usuario_buscado.salario_basico))
+        self.assertEqual(usuario_prueba.fecha_inicio, str(Usuario_buscado.fecha_inicio))
+        self.assertEqual(usuario_prueba.fecha_ultimo_vacaciones, str(Usuario_buscado.fecha_ultimo_vacaciones))
+        self.assertEqual(usuario_prueba.dias_vacaciones_acumulados, str(Usuario_buscado.dias_vacaciones_acumulados))
+        
+    def TestInsertError(self):
+        """ Verifica que funcione bien la creacion y la busqueda de un usuario """
+
+        print("Ejecutando testInsert1")
+        
+        usuario_prueba = Usuario("12345","Juan", 2000000, "10/05/2023", "10/05/2024", 150)
+        Insertar(usuario_prueba)
+
+        usuario_prueba2 = Usuario("12345","Jose", 4000000, "10/05/2023", "10/05/2024", 160)
+        
+        with self.assertRaises(ErrorNoInsertado):
+            Insertar(usuario_prueba2)
+        
+
+if __name__ == '__main__':
+    unittest.main()

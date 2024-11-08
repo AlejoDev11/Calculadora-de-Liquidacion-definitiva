@@ -1,7 +1,6 @@
 import sys
 sys.path.append("src")
 import psycopg2
-from contextlib import closing
 import SecretConfig
 from Logica.calculadora import Usuario
 
@@ -21,6 +20,9 @@ class ErrorNoBorrado(Exception):
 class ErrorConexionBD(Exception):
     pass 
 
+class ErrorNoSeCreoLaBD(Exception):
+    pass
+
 def ObtenerConexion():
     """
     Crea la conexión a la base de datos.
@@ -38,23 +40,27 @@ def ObtenerConexion():
 
 # Creación de tabla
 def CrearTabla():
-    """Crea la tabla de usuarios si no existe."""
-    with open("sql/crear-usuarios.sql", "r") as f:
+    """
+    Crea la tabla de usuarios, en caso de que no exista
+    """    
+    sql = ""
+    with open("sql/crear-usuarios.sql","r") as f:
         sql = f.read()
-    
-    with closing(ObtenerConexion()) as conn, conn.cursor() as cursor:
-        try:
-            cursor.execute(sql)
-            conn.commit()
-        except psycopg2.errors.DuplicateTable:
-            conn.rollback()
+
+    cursor = ObtenerConexion()
+
+    try:
+        cursor.execute( sql )
+        cursor.connection.commit()
+    except:
+        cursor.connection.rollback()
 
 def BorrarFilas():
     """Borra todas las filas de la tabla usuarios."""
     sql = "DELETE FROM usuarios;"
-    with closing(ObtenerConexion()) as conn, conn.cursor() as cursor:
-        cursor.execute(sql)
-        conn.commit()
+    cursor = ObtenerConexion()
+    cursor.execute(sql)
+    cursor.connection.commit()
 
 # Insertar en la BD
 def Insertar(usuario: Usuario):
@@ -70,70 +76,65 @@ def Insertar(usuario: Usuario):
     
     try:
         conexion.execute(sql)
-        conexion.commit()  # Usa la conexión para hacer commit
+        conexion.connection.commit()  # Usa la conexión para hacer commit
     except:
         raise ErrorNoInsertado(f"No se pudo insertar el usuario: {usuario.cedula}")
 
 
 # Modificar Datos
-def Actualizar(usuario: Usuario):
+def Actualizar(cedula: str, nombre, salario_basico, fecha_inicio, fecha_ultimo_vacaciones, dias_vacaciones_acumulados):
     """
     Actualiza los datos de un usuario en la base de datos.
     """
     conexion = ObtenerConexion()
     try:
-        if not BuscarUsuariosExistentes(usuario.cedula):
-            raise ErrorNoActualizado(f"No se encontró el usuario con cédula: {usuario.cedula}")
+        if BuscarUsuariosExistentes(cedula) == False:
+            raise ErrorNoActualizado(f"No se encontró el usuario con cédula: {cedula}")
 
         conexion.execute(f"""
             UPDATE usuarios
             SET
-                nombre = %s,
-                basic_salary = %s,
-                start_work_date = %s,
-                last_vacation_date = %s,
-                accumulated_vacation_days = %s
-            WHERE cedula = %s
-        """, (usuario.nombre, usuario.basic_salary, usuario.start_date, usuario.last_vacation_date, usuario.accumulated_vacation_days, usuario.cedula))
-
-        conexion.commit()
-        print(f"Usuario con cédula {usuario.cedula} actualizado exitosamente.")
-    except Exception as e:
-        conexion.rollback()
-        raise ErrorNoActualizado(f"No se pudo actualizar el registro con la cédula: {usuario.cedula}. Error: {str(e)}")
-    finally:
-        conexion.close()
+                nombre = '{nombre}',
+                basic_salary = '{salario_basico}',
+                start_work_date = '{fecha_inicio}',
+                last_vacation_date = '{fecha_ultimo_vacaciones}',
+                accumulated_vacation_days = '{dias_vacaciones_acumulados}'
+            WHERE cedula = '{cedula}';
+        """)
+        conexion.connection.commit()
+        return f"Usuario con cédula {cedula}, fue actualizado exitosamente."
+    except:
+        raise ErrorNoActualizado(f"No se pudo actualizar el registro con la cédula: {cedula}")
 
 
 # Borrar Usuario
 def Borrar(cedula: str):
     """Elimina un usuario de la base de datos según su cédula."""
-    sql = "DELETE FROM usuarios WHERE cedula = %s"
-    if not BuscarUsuariosExistentes(cedula):
+    sql = f"""DELETE FROM usuarios WHERE cedula = '{cedula}'"""
+    if BuscarUsuariosExistentes(cedula) == False:
         raise ErrorNoBorrado(f"No se encontró el usuario con cédula: {cedula}")
-    
-    with closing(ObtenerConexion()) as conn, conn.cursor() as cursor:
-        try:
-            cursor.execute(sql, (cedula,))
-            conn.commit()
-        except Exception as e:
-            conn.rollback()
-            raise ErrorNoBorrado(f"No se pudo borrar el usuario: {str(e)}")
+    cursor = ObtenerConexion()
+    try:
+        cursor.execute(sql)
+        cursor.connection.commit()
+        return f"usuario borrado Exitosamente"
+        
+    except:
+        raise ErrorNoBorrado(f"No se pudo borrar el usuario: {cedula}")
 
 # Consultar Usuario
 def BuscarUsuarios(cedula: str) -> Usuario:
     """Busca y devuelve un usuario según la cédula."""
-    sql = """
-        SELECT nombre, cedula, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days
-        FROM usuarios WHERE cedula = %s
+    sql = f"""
+        SELECT nombre, cedula, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days FROM usuarios WHERE cedula = '{cedula}' 
     """
-    with closing(ObtenerConexion()) as conn, conn.cursor() as cursor:
-        cursor.execute(sql, (cedula,))
-        resultado = cursor.fetchone()
-        if resultado is None:
-            raise ErrorNoEncontrado(f"No se encontró el usuario con cédula: {cedula}")
+    cursor = ObtenerConexion()
+    cursor.execute(sql)
+    resultado = cursor.fetchone()
+    if resultado is None:
+        raise ErrorNoEncontrado(f"No se encontró el usuario con cédula: {cedula}")
         
-        return Usuario(*resultado)
+    return Usuario(resultado[1], resultado[0], resultado[2], resultado[3], resultado[4], resultado[5])
 
 # Verificar si un Usuario existe
 def BuscarUsuariosExistentes(cedula: str) -> bool:

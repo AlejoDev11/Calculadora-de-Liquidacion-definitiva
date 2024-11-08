@@ -1,2 +1,5 @@
 .venv
 .idea
+SecretConfig
+
+_pycache_
