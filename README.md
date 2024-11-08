@@ -18,10 +18,10 @@ Asegúrate de tener instalado:
 - Python 3.8 o superior
 - `unittest` (incluido por defecto en Python)
  ```markdown
--  pip install psycopg2
+ pip install psycopg2
   ```
   ```markdown
- - pip install flask
+ pip install flask
   ```
 
 ## Cómo Ejecutar el Proyecto
