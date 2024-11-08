@@ -26,15 +26,16 @@ def insertado():
     start_date = request.args["start_date"]
     last_vacation_date = request.args["last_vacation_date"]
     accumulated_vacation_days = request.args["accumulated_vacation_days"]
+    motivo_finalizacion = request.args["motivo_finalizacion"]
         
-    usuario = Usuario(cedula, nombre, basic_salary, start_date, last_vacation_date, accumulated_vacation_days)
+    usuario = Usuario(cedula, nombre, basic_salary, start_date, last_vacation_date, accumulated_vacation_days, motivo_finalizacion)
         
     try:
         Insertar(usuario)
+        return f"El usuario fue insertado exitosamente"
     except:
         raise ErrorNoInsertado(f"El usuario no pudo ser insertado")
-    
-    return f"El usuario fue insertado exitosamente"
+
 
 @app.route('/actualizar')
 def actualizar():
@@ -50,11 +51,12 @@ def actualizado():
     start_date = request.args['start_date']
     last_vacation_date = request.args['last_vacation_date']
     accumulated_vacation_days = request.args['accumulated_vacation_days']
+    motivo_finalizacion = request.args["motivo_finalizacion"]
         
-    usuario = Usuario(cedula, nombre, basic_salary, start_date, last_vacation_date, accumulated_vacation_days)
+    usuario = Usuario(cedula, nombre, basic_salary, start_date, last_vacation_date, accumulated_vacation_days, motivo_finalizacion)
         
     try:
-        Actualizar(cedula, nombre, basic_salary, start_date, last_vacation_date, accumulated_vacation_days)
+        Actualizar(usuario.cedula, usuario.nombre, usuario.salario_basico, usuario.fecha_inicio, usuario.fecha_ultimo_vacaciones, usuario.dias_vacaciones_acumulados, usuario.motivo_finalizacion)
         return f"El usuario ha sido actualizado "
     except:
         raise ErrorNoActualizado(f"No se pudo actualizar el usuario con la cedula {cedula}")

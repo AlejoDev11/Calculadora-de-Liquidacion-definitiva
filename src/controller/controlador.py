@@ -68,8 +68,7 @@ def BorrarFilas():
 # Insertar en la BD
 def Insertar(usuario: Usuario):
     """Guarda un Usuario en la base de datos."""
-    sql = f"""
-        INSERT INTO usuarios (cedula, nombre, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days, reason_for_termination)
+    sql = f"""INSERT INTO usuarios (cedula, nombre, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days, reason_for_termination)
         VALUES ('{usuario.cedula}','{usuario.nombre}','{usuario.salario_basico}','{usuario.fecha_inicio}','{usuario.fecha_ultimo_vacaciones}','{usuario.dias_vacaciones_acumulados}', '{usuario.motivo_finalizacion}');
     """
     if BuscarUsuariosExistentes(usuario.cedula) == True:
