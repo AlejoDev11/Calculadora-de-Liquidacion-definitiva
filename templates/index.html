@@ -1,17 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Página de Inicio</title>
-</head>
-<body>
-    <h1>Bienvenido a la Calculadora de Liquidación Definitiva</h1>
-    <ul>
-        <li><a href="/insertar">Insertar Usuario</a></li>
-        <li><a href="/actualizar">Actualizar Usuario</a></li>
-        <li><a href="/borrar">Borrar Usuario</a></li>
-        <li><a href="/buscar">Buscar Usuario</a></li>
-        <li><a href="/calcular_liquidacion">Calcular liquidacion definitiva</a></li>
-    </ul>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+<h2>Bienvenido a la Calculadora de liquidación definitiva</h2>
+<p>Utiliza el menú para administrar usuarios.</p>
+{% endblock %}

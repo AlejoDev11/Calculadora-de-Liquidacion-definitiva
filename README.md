@@ -8,6 +8,9 @@ Dubin Andrés Soto Parodi
 ## Editado por:
 Juan Diego Gomez - Juan Diego Usuga
 
+## Editador por segunda vez por:
+Alejandro Bustamante y Juan Jose Peñuela 
+
 ## Requisitos
 
 Asegúrate de tener instalado:
@@ -24,11 +27,10 @@ Clona este repositorio en tu máquina local usando Git:
 https://github.com/JuanPyC/Calculadora-de-Liquidacion-definitiva
 
 ```
-### Paso 4: Cómo configurar el archivo SecretConfig.py:
+### Cómo configurar el archivo SecretConfig.py:
 Datos secretos que no deben publicarse en el repositorio
 
-Diligencie estos datos y guarde un archivo como SecretConfig.py en la raiz del proyecto
-para poder ejecutar la aplicación de manera correcta
+Cree un archivo llamado SecretConfig en la carpeta raíz del proyecto "src", el cual contendrá los información de su base de datos. 
 
 #### El Archivo debe de contener lo siguiente:
 PGDATABASE = "ESCRIBA EL NOMBRE DE LA BASE DE DATOS"
@@ -37,12 +39,14 @@ PGPASSWORD = "ESCRIBA LA CONSTRASEÑA"
 PGHOST = "ESCRIBA LA DIRECCION DNS O DIRECCION IP DEL SERVIDOR"
 PGPORT = 5432 # POR DEFECTO ES 5432, PERO PUEDE CAMBIAR EN SU DB
 
-### Paso 3: Cómo correr las pruebas unitarias:
+### Cómo correr las pruebas unitarias:
 ```markdown
 python test/testcontroller.py
 ```
 
-### Paso 4: Cómo operar la consola de la BD:
+### Cómo operar la consola de la BD:
 ```markdown
 python src/Consola/Consola_Base_de_datos.py
 ```
+
+### Cómo ejecutar la aplicación web:

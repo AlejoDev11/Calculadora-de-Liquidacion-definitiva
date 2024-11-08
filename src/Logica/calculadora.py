@@ -2,14 +2,14 @@ from datetime import datetime
 import math
 
 class Usuario:
-    def __init__(self, nombre: str, cedula: str, motivo_finalizacion: str, salario_basico: float, fecha_inicio: str, fecha_ultimo_vacaciones: str):
-        self.nombre = nombre
+    def __init__(self, cedula: str, nombre: str, salario_basico: float, fecha_inicio: str, fecha_ultimo_vacaciones: str, dias_vacaciones_acumulados: int):
         self.cedula = cedula
-        self.motiivo_finalizacion = motivo_finalizacion
+        self.nombre = nombre 
         self.salario_basico = salario_basico
         self.fecha_inicio = fecha_inicio
         self.fecha_ultimo_vacaciones = fecha_ultimo_vacaciones
-        self.dias_vacaciones_acumulados = 0
+        self.dias_vacaciones_acumulados = dias_vacaciones_acumulados
+        self.motivo_finalizacion = None
 
 class ErrorDiasAcumulados(Exception):
     pass

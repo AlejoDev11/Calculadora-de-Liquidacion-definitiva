@@ -1,9 +1,11 @@
 import sys
 sys.path.append("src")
-from Logica.calculadora import Usuario
 import psycopg2
+from contextlib import closing
 import SecretConfig
+from Logica.calculadora import Usuario
 
+# Definición de excepciones personalizadas
 class ErrorNoEncontrado(Exception):
     pass
 
@@ -16,136 +18,132 @@ class ErrorNoActualizado(Exception):
 class ErrorNoBorrado(Exception):
     pass
 
-def ObtenerCursor() :
-    """
-    Crea la conexion a la base de datos y retorna un cursor para ejecutar instrucciones
-    """
-    DATABASE = SecretConfig.PGDATABASE
-    USER = SecretConfig.PGUSER
-    PASSWORD = SecretConfig.PGPASSWORD
-    HOST = SecretConfig.PGHOST
-    PORT = SecretConfig.PGPORT
-    connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
-    return connection.cursor()
+def ObtenerConexion():
+    """Establece una conexión con la base de datos."""
+    return psycopg2.connect(
+        database=SecretConfig.PGDATABASE,
+        user=SecretConfig.PGUSER,
+        password=SecretConfig.PGPASSWORD,
+        host=SecretConfig.PGHOST,
+        port=SecretConfig.PGPORT
+    )
 
-#Creacion de tabla
+def ObtenerCursor():
+    """
+    Retorna un cursor para ejecutar instrucciones, manteniendo la misma conexión abierta.
+    """
+    conexion = ObtenerConexion()
+    return conexion.cursor()
+
+# Creación de tabla
 def CrearTabla():
-    """
-    Crea la tabla de usuarios, en caso de que no exista
-    """    
-    sql = ""
-    with open("sql/crear-usuarios.sql","r") as f:
+    """Crea la tabla de usuarios si no existe."""
+    with open("sql/crear-usuarios.sql", "r") as f:
         sql = f.read()
-
-    cursor = ObtenerCursor()
-
-    try:
-        cursor.execute( sql )
-        cursor.connection.commit()
-    except:
-        # SI LLEGA AQUI, ES PORQUE LA TABLA YA EXISTE
-        cursor.connection.rollback()
+    
+    with closing(ObtenerConexion()) as conn, conn.cursor() as cursor:
+        try:
+            cursor.execute(sql)
+            conn.commit()
+        except psycopg2.errors.DuplicateTable:
+            conn.rollback()
 
 def BorrarFilas():
-    """
-    Borra todas las filas de la tabla (DELETE)
-    ATENCION: EXTREMADAMENTE PELIGROSO.
-    """
-    sql = "Delete from usuarios;"
-    cursor = ObtenerCursor()
-    cursor.execute( sql )
-    cursor.connection.commit()
+    """Borra todas las filas de la tabla usuarios."""
+    sql = "DELETE FROM usuarios;"
+    with closing(ObtenerConexion()) as conn, conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
 
-#Insertar en la BD
-def Insertar( usuario : Usuario ):
-    """ Guarda un Usuario en la base de datos """
-        # Todas las instrucciones se ejecutan a tavés de un cursor
+# Insertar en la BD
+def Insertar(usuario: Usuario):
+    """Guarda un Usuario en la base de datos."""
+    sql = """
+        INSERT INTO usuarios (cedula, nombre, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    if not BuscarUsuariosExistentes(usuario.cedula):
+        raise ErrorNoInsertado(f"El usuario con cédula {usuario.cedula} ya existe.")
+    
+    conexion = ObtenerConexion()  # Obtén la conexión por separado
+    cursor = ObtenerCursor()  # Obtén solo el cursor
+    
     try:
-        cursor = ObtenerCursor()
-        if BuscarUsuariosExistentes(usuario.cedula) is False:
-            raise ErrorNoInsertado(f"El usuario con cédula {usuario.cedula} ya existe.")
-        else:
-            cursor.execute(f"""
-            insert into usuarios (
-                cedula,   nombre,  basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days
-            )
-            values 
-            (
-                '{usuario.cedula}',  '{usuario.nombre}', '{usuario.basic_salary}', '{usuario.start_date}', '{usuario.last_vacation_date}', '{usuario.accumulated_vacation_days}'
-            );
-                       """)
-            cursor.connection.commit()
-    except:
-        raise ErrorNoInsertado(f"No se pudo insertar el usuario")   
-#Modificar Datos
+        cursor.execute(sql, (usuario.cedula, usuario.nombre, usuario.salario_basico, usuario.fecha_inicio, usuario.fecha_ultimo_vacaciones, usuario.dias_vacaciones_acumulados))
+        conexion.commit()  # Usa la conexión para hacer commit
+    except Exception as e:
+        conexion.rollback()  # Asegúrate de hacer rollback si ocurre un error
+        raise ErrorNoInsertado(f"No se pudo insertar el usuario: {str(e)}")
+    finally:
+        cursor.close()  # Cierra el cursor después de la operación
+        conexion.close()  # Cierra la conexión después de la operación
 
-def Actualizar( usuario : Usuario ):
+
+# Modificar Datos
+def Actualizar(usuario: Usuario):
     """
-    Actualiza los datos de un usuario en la base de datos
-
-    El atributo cedula nunca se debe cambiar, porque es la clave primaria
+    Actualiza los datos de un usuario en la base de datos.
+    El atributo cedula nunca se debe cambiar, porque es la clave primaria.
     """
     try:
-        cursor = ObtenerCursor()
-        if BuscarUsuariosExistentes(usuario.cedula) == True:
-            raise ErrorNoActualizado
+        conexion, cursor = ObtenerCursor()  # Desempaqueta la tupla correctamente
+        # Verifica si el usuario existe antes de intentar actualizar
+        if not BuscarUsuariosExistentes(usuario.cedula):
+            raise ErrorNoActualizado(f"No se encontró el usuario con la cédula: {usuario.cedula}")
+        
         cursor.execute(f"""
             UPDATE usuarios
             SET
                 nombre='{usuario.nombre}',
-                basic_salary='{usuario.basic_salary}',
-                start_work_date='{usuario.start_date}',
-                last_vacation_date='{usuario.last_vacation_date}',
-                accumulated_vacation_days='{usuario.accumulated_vacation_days}'
-            where cedula='{usuario.cedula}'
-            """)
-        cursor.connection.commit()
-    except:
-        raise ErrorNoActualizado(f"No se pudo actualizar el registro con la cedula: {usuario.cedula}")
-
-def Borrar( cedula:str ):
-    """ Elimina la fila que contiene a un usuario en la BD """
-    try:
-        sql = f"delete from usuarios where cedula = '{cedula}'" 
-        if BuscarUsuariosExistentes(cedula) == True:
-            raise ErrorNoBorrado
-        cursor = ObtenerCursor()
-        cursor.execute( sql )
-        cursor.connection.commit()
-    except:
-        raise ErrorNoBorrado(f"No se pudo borrar el registro con la cedula {cedula}")
+                basic_salary='{usuario.salario_basico}',
+                start_work_date='{usuario.fecha_inicio}',
+                last_vacation_date='{usuario.fecha_ultimo_vacaciones}',
+                accumulated_vacation_days='{usuario.dias_vacaciones_acumulados}'
+            WHERE cedula='{usuario.cedula}'
+        """)
+        conexion.commit()  # Usar la conexión para hacer commit
+    except Exception as e:
+        raise ErrorNoActualizado(f"No se pudo actualizar el registro con la cédula: {usuario.cedula}. Error: {str(e)}")
 
 
-#Consultar
+# Borrar Usuario
+def Borrar(cedula: str):
+    """Elimina un usuario de la base de datos según su cédula."""
+    sql = "DELETE FROM usuarios WHERE cedula = %s"
+    if not BuscarUsuariosExistentes(cedula):
+        raise ErrorNoBorrado(f"No se encontró el usuario con cédula: {cedula}")
+    
+    with closing(ObtenerConexion()) as conn, conn.cursor() as cursor:
+        try:
+            cursor.execute(sql, (cedula,))
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            raise ErrorNoBorrado(f"No se pudo borrar el usuario: {str(e)}")
 
-def BuscarUsuarios( cedula: str ):
+# Consultar Usuario
+def BuscarUsuarios(cedula: str) -> Usuario:
+    """Busca y devuelve un usuario según la cédula."""
+    sql = """
+        SELECT nombre, cedula, basic_salary, start_work_date, last_vacation_date, accumulated_vacation_days
+        FROM usuarios WHERE cedula = %s
     """
-    Carga de la DB las filas de la tabla usuarios
+    with closing(ObtenerConexion()) as conn, conn.cursor() as cursor:
+        cursor.execute(sql, (cedula,))
+        resultado = cursor.fetchone()
+        if resultado is None:
+            raise ErrorNoEncontrado(f"No se encontró el usuario con cédula: {cedula}")
+        
+        return Usuario(*resultado)
+
+# Verificar si un Usuario existe
+def BuscarUsuariosExistentes(cedula: str) -> bool:
+    """
+    Verifica si un usuario con la cédula dada existe en la base de datos.
+    Retorna True si existe, False en caso contrario.
     """
     cursor = ObtenerCursor()
-    cursor.execute(f""" Select nombre, cedula, basic_salary, start_work_date, last_vacation_date, 
-        accumulated_vacation_days from usuarios where cedula = '{cedula}' """)
-    
-    lista = cursor.fetchone()
+    cursor.execute(f"SELECT 1 FROM usuarios WHERE cedula = '{cedula}'")
+    resultado = cursor.fetchone()
+    return resultado is not None  # Retorna True si el usuario existe
 
-    if lista is None:
-        raise ErrorNoEncontrado(f"No se encontro al usuario con la cedula = {cedula}")
-    
-    else:
-        return Usuario(lista[1],lista[0],lista[2],lista[3], lista[4],lista[5])
-    
-def BuscarUsuariosExistentes( cedula: str ):
-    """
-    Carga de la DB las filas de la tabla usuarios
-    """
-    cursor = ObtenerCursor()
-    cursor.execute(f""" Select nombre, cedula, basic_salary, start_work_date, last_vacation_date, 
-        accumulated_vacation_days from usuarios where cedula = '{cedula}' """)
-    
-    lista = cursor.fetchone()
-
-    if lista is None:
-        return True
-    
-    else:
-        return False
